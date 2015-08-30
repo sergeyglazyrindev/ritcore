@@ -5,13 +5,20 @@ from rit.core.decorators import cached_property
 
 class DynamicContentElementHandler(object):
 
-    def __init__(self, element, output):
+    def __init__(self, element):
         self.element = element
-        self.output = output
 
-    def parse(self):
+    def parse(self, env):
 
-        self.output.write_to_header('<b></b>')
+        env.output.write_to_header('<b></b>')
+
+
+class DynamicContentXmlEnvironment(object):
+
+    def __init__(self, context):
+
+        self.output = DynamicContentXmlOutput()
+        self.context = context
 
 
 class DynamicContentXmlOutput(object):
@@ -35,31 +42,30 @@ class DynamicContentXmlOutput(object):
 
 class DynamicContentXmlLoader(object):
 
-    def __init__(self, template):
+    def __init__(self, template, context):
         self.template = template
+        self.env = DynamicContentXmlEnvironment(context)
 
     def load(self):
         with open(self.template) as fp:
             tree = etree.parse(fp)
-            return DynamicContentXmlParser(tree).parse()
+            return DynamicContentXmlParser(tree).parse(self.env)
 
 
 class DynamicContentXmlParser(object):
 
-    def __init__(self, tree, context={}, output=None):
+    def __init__(self, tree):
         self.tree = tree
-        self.context = {}
-        self.output = output or DynamicContentXmlOutput()
 
-    def parse(self):
+    def parse(self, env):
 
         root = self.tree.getroot()
-        DynamicContentElementHandler(root, self.output).parse()
+        DynamicContentElementHandler(root).parse(env)
         for el in root.getchildren():
-            DynamicContentXmlParser(el, self.context, self.output).parse()
+            DynamicContentXmlParser(el).parse(env)
 
-        return self.output.context
+        return env.output.context
 
 
-def parse_dynamic_page_xml(template_path):
-    return DynamicContentXmlLoader(template_path).load()
+def parse_dynamic_page_xml(template_path, context={}):
+    return DynamicContentXmlLoader(template_path, context).load()
