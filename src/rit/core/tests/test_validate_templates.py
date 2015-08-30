@@ -34,8 +34,15 @@ class ValidateProjectTemplatesTestCase(unittest.TestCase):
         with open(template_path, 'r') as fp:
             try:
                 template = etree.XML(fp.read())
-                dtd.validate(template)
-                print(dtd.error_log.filter_from_errors())
+                is_valid = dtd.validate(template)
+                if not is_valid:
+                    self.assertTrue(
+                        is_valid,
+                        'Error in xml file: {}. Errors: {}'.format(
+                            template_path,
+                            dtd.error_log.filter_from_errors()
+                        )
+                    )
             except etree.XMLSyntaxError as e:
                 raise Exception('Bad xml syntax in file: {}. Error: {}'.format(
                     template_path,
