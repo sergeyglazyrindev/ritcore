@@ -1,6 +1,6 @@
 import unittest
 
-# from rit.app import settings
+from rit.app import settings
 from rit.core.decorators import cached_property
 from lxml import etree
 from os import path, walk
@@ -11,10 +11,10 @@ basecore_folder = path.realpath(path.join(cur_file_path, '../'))
 
 
 def find_all_templates():
-    folders_to_search_in = (path.realpath(path.join(
+    folders_to_search_in = tuple([path.realpath(path.join(
         basecore_folder,
         'templates/basexml'
-    )), )
+    )), ] + list(settings.TEMPLATE_FOLDERS))
     templates = []
     for folder in folders_to_search_in:
         for root, dirnames, filenames in walk(folder):
