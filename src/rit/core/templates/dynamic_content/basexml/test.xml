@@ -1,0 +1,4 @@
+<root>
+  <foo test="1"></foo>
+  <xmlinclude src="menupages/test.xml" />
+</root>  

@@ -3,9 +3,9 @@ from functools import wraps
 
 def cached_property(func):
     @wraps(func)
-    def wrapper(*args, **kwargs):
-        if hasattr(wrapper, '__result'):
-            return getattr(wrapper, '__result')
-        setattr(wrapper, '__result', func(*args, **kwargs))
-        return getattr(wrapper, '__result')
+    def wrapper(self, *args, **kwargs):
+        if hasattr(self, '__result'):
+            return getattr(self, '__result')
+        setattr(self, '__result', func(self, *args, **kwargs))
+        return getattr(self, '__result')
     return property(wrapper)

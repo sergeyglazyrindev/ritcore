@@ -1,1 +1,5 @@
-<!ELEMENT foo EMPTY>
+<!ELEMENT root ANY>
+<!ELEMENT foo (#PCDATA)>
+<!ATTLIST foo test CDATA #IMPLIED>
+<!ELEMENT xmlinclude (#PCDATA)>
+<!ATTLIST xmlinclude src CDATA #IMPLIED>
