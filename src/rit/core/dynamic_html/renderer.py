@@ -23,7 +23,7 @@ class DynamicContentXmlOutput(object):
     def write_to_header(self, html, header_type='common'):
         self._header[header_type] += html
 
-    @cached_property
+    @property
     def context(self):
         context = self._body_blocks.copy()
         context.update({
@@ -43,38 +43,49 @@ class DynamicContentXmlLoader(object):
         return DynamicContentXmlParser(self.template).parse(self.env)
 
 
-element_xml_include = lambda el: el.tag == 'xmlinclude'
+element_is_xml_include = lambda el: el.tag == 'xmlinclude'
 
 
 def xml_include(template, element, env):
     base_template_path = os.path.dirname(template)
-    new_template_path = os.path.realpath(os.path.join(base_template_path, element.attrib['src']))
+    new_template_path = os.path.realpath(
+        os.path.join(base_template_path, element.attrib['src'])
+    )
     if base_template_path not in new_template_path:
-        raise DynamicContentIncludeError('{} not placed in folder {}'.format(new_template_path, base_template_path))
+        raise DynamicContentIncludeError(
+            '{} not placed in folder {}'.format(
+                new_template_path,
+                base_template_path
+            )
+        )
     return DynamicContentXmlParser(new_template_path).parse(env)
 
 
 class DynamicContentXmlParser(object):
 
-    def __init__(self, template):
+    def __init__(self, template, el=None):
         self.template = template
-        self.fp = open(self.template)
+        self.__el = el
+
+    @cached_property
+    def el(self):
+        if self.__el is not None:
+            return self.__el
+        with open(self.template) as fp:
+            return etree.parse(fp).getroot()
 
     def parse(self, env):
 
-        with open(self.template) as fp:
-            tree = etree.parse(fp)
-            root = tree.getroot()
-            if element_xml_include(root):
-                return xml_include(self.template, root, env)
+        el = self.el
+        if element_is_xml_include(el):
+            return xml_include(self.template, el, env)
 
-            for el in root.getchildren():
-                if element_xml_include(el):
-                    xml_include(self.template, el, env)
-                    continue
-                render_block(env, el)
+        render_block(env, el)
 
-            return env.output.context
+        for _el in el.getchildren():
+            DynamicContentXmlParser(self.template, el=_el).parse(env)
+
+        return env.output.context
 
 
 def parse_dynamic_page_xml(template_path, context={}):

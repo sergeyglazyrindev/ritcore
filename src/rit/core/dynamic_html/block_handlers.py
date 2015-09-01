@@ -16,4 +16,7 @@ def test(env, element):
 
 
 def render_block(env, element):
-    BLOCK_HANDLERS[element.tag.lower()](env, element)
+    try:
+        BLOCK_HANDLERS[element.tag.lower()](env, element)
+    except KeyError:
+        pass

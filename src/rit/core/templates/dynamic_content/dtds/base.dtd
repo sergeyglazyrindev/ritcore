@@ -1,4 +1,5 @@
 <!ELEMENT root ANY>
+<!ELEMENT testdescendant ANY>
 <!ELEMENT foo (#PCDATA)>
 <!ATTLIST foo test CDATA #IMPLIED>
 <!ELEMENT xmlinclude (#PCDATA)>
