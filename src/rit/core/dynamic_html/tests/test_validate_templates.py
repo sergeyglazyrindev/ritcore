@@ -6,7 +6,7 @@ from lxml import etree
 from os import path, walk
 import fnmatch
 from rit.core.dynamic_html import settings as dynamic_html_settings
-from rit.core.dynamic_html import parse_dynamic_page_xml
+# from rit.core.dynamic_html import parse_dynamic_page_xml
 
 
 def find_all_templates():
@@ -29,23 +29,23 @@ class ValidateProjectTemplatesTestCase(unittest.TestCase):
             self.__validate_template(template_path)
 
     def __validate_template(self, template_path):
-        dtd = self.dtd
+        xsd_schema = self.xsd_schema
+        parser = etree.XMLParser(schema=xsd_schema)
         with open(template_path) as fp:
             try:
-                template = etree.XML(fp.read())
-                is_valid = dtd.validate(template)
-                if not is_valid:
-                    self.assertTrue(
-                        is_valid,
-                        'Error in xml file: {}. Errors: {}'.format(
-                            template_path,
-                            dtd.error_log.filter_from_errors()
-                        )
-                    )
+
+                etree.fromstring(fp.read(), parser)
+                # self.assertTrue(
+                #     is_valid,
+                #     'Error in xml file: {}. Errors: {}'.format(
+                #         template_path,
+                #         dtd.error_log.filter_from_errors()
+                #     )
+                # )
                 # try to parse a file by our parser
-                print(parse_dynamic_page_xml(
-                    template_path,
-                ))
+                # print(parse_dynamic_page_xml(
+                #     template_path,
+                # ))
             except etree.XMLSyntaxError as e:
                 raise Exception('Bad xml syntax in file: {}. Error: {}'.format(
                     template_path,
@@ -53,12 +53,13 @@ class ValidateProjectTemplatesTestCase(unittest.TestCase):
                 ))
 
     @cached_property
-    def dtd(self):
-        return etree.DTD(self.dtd_path)
+    def xsd_schema(self):
+        with open(self.xsd_path) as fp:
+            return etree.XMLSchema(etree.XML(fp.read()))
 
     @cached_property
-    def dtd_path(self):
+    def xsd_path(self):
         return path.realpath(path.join(
             dynamic_html_settings.TEMPLATES_FOLDER,
-            'dtds/base.dtd'
+            'xsd/base.xsd'
         ))

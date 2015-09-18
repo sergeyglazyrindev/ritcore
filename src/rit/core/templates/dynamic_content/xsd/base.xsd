@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<xs:schema xml:lang="en"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:xml="http://www.w3.org/XML/1998/namespace"
+    elementFormDefault="qualified">
+  <xs:include schemaLocation="src/rit/core/templates/dynamic_content/xsd/current_html.xsd" />
+  <xs:group name="ritcoreels">
+    <xs:choice>
+      <xs:element ref="test"/>
+      <xs:element ref="test_descendant"/>
+      <xs:element ref="xmlinclude"/>
+      <xs:element ref="root"/>
+    </xs:choice>
+  </xs:group>
+  <xs:element name="test">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="test_green" type="xs:string"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="test_descendant">
+    <xs:complexType mixed="true">
+      <xs:complexContent>
+        <xs:extension base="Flow">
+          <xs:attributeGroup ref="attrs"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+    </xs:element>
+    <xs:element name="xmlinclude">
+      <xs:complexType>
+        <xs:attribute name="src" type="xs:string"/>
+      </xs:complexType>
+    </xs:element>
+  <xs:element name="root">
+    <xs:complexType mixed="true">
+      <xs:complexContent>
+        <xs:extension base="Flow">
+          <xs:attributeGroup ref="attrs"/>
+        </xs:extension>
+      </xs:complexContent>
+      </xs:complexType>
+    </xs:element>
+</xs:schema>
