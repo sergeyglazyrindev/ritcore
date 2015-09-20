@@ -19,6 +19,10 @@ class ValidateProjectTemplatesTestCase(unittest.TestCase):
         with open(template_path) as fp:
             try:
                 xml = fp.read()
+                # @todo, maybe we can skip this logic, but how do we
+                # validate xml without it ? placing it in all template
+                # sounds bad, we need to specify namespace, so xml
+                # would be validated
                 if not xml.startswith('<?xml version="1.0"?>'):
                     xml = u'<?xml version="1.0"?><root '
                     u' xmlns="http://www.w3.org/1999/xhtml">{}</root>'.format(
@@ -33,8 +37,21 @@ class ValidateProjectTemplatesTestCase(unittest.TestCase):
 
     @cached_property
     def xsd_schema(self):
-        with open(self.xsd_path) as fp:
-            return etree.XMLSchema(etree.XML(fp.read()))
+        xsd_path = self.xsd_path
+        with open(xsd_path) as fp:
+            schema = fp.read()
+            # @todo, improve, bad case:
+            # but how to run tests within another projects placed
+            # in the same namespace ?
+            # nosetests --traverse-namespace does this thing but we
+            # need to properly specify current_html_xsd_path, if we
+            # don't (means, hardcode in template as relative to
+            # current directory), it would fail because it strictly
+            # relies on the folder we currently here at (when run tests)
+            schema = schema.format(
+                current_html_xsd_location=path.dirname(xsd_path)
+            )
+            return etree.XMLSchema(etree.XML(schema))
 
     @cached_property
     def xsd_path(self):
