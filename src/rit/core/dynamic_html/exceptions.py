@@ -1,2 +1,0 @@
-class DynamicContentIncludeError(Exception):
-    pass

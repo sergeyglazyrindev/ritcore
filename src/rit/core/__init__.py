@@ -1,3 +1,3 @@
-__all__ = ['parse_dynamic_page_xml', ]
+__all__ = ['parse_dynamic_content_xml', ]
 
-from .dynamic_html import parse_dynamic_page_xml
+from .dynamic_content import parse_dynamic_content_xml

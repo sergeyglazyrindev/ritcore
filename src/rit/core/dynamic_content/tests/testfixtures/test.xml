@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>dsadas</title>
+  </head>
+<body>
+  <test_descendant>
+    <xmlinclude src="menupages/test.xml" />
+  </test_descendant>
+  <xmlinclude src="menupages/test.xml" />
+</body>
+</html>
