@@ -1,4 +1,4 @@
-from rit.app import settings
+from rit.app.conf import settings
 
 from os import path, walk
 import fnmatch
