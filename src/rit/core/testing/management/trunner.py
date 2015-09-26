@@ -20,7 +20,7 @@ class TestRunner(BaseCommand):
         parser.add_argument('--traverse-namespace', help="Traverse all packages in namespace"
                             "and executes all needed tests", action="store_true", default=False)
         args = parser.parse_args(args=args)
-        nose_argv = ['nosetests', '-x', '-s']
+        nose_argv = ['-x', '-s']
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv = nose_argv + settings.NOSE_ARGS
         if args.traverse_namespace:
