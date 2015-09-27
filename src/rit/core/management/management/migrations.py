@@ -2,16 +2,17 @@ import os
 import argparse
 
 from amigrations import AMigrations
+from rit.app.conf import settings
 
 
 class Migrations(object):
 
-    def __init__(self):
+    def __init__(self, alias='default'):
         self.migration_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__),
             "migrations"
         ))
-        self.amigrations = AMigrations('mysql://root:123456@localhost:3306/amigrations_test', self.migration_path)
+        self.amigrations = AMigrations(settings.DATABASES[alias], self.migration_path)
 
     def parse_cargs(self, *params):
         parser = argparse.ArgumentParser()
@@ -34,8 +35,10 @@ class Migrations(object):
 
     def apply(self, args):
         if not args.to:
+            print("Applying migrations")
             self.amigrations.upgrade()
         else:
+            print("Downgrading migrations")
             self.amigrations.downgrade_to(args.to)
 
     def create(self, args):
