@@ -2,6 +2,7 @@
 
 import os
 import sys
+import importlib
 
 from acmdrunner import Loader, execute_command
 
@@ -15,5 +16,7 @@ def run():
 
 
 if __name__ == '__main__':
-
+    if os.getenv('RIT_SETTINGS_MODULE'):
+        importlib.import_module(os.getenv('RIT_SETTINGS_MODULE'))
+        os.environ['RIT_MIGRATION_PATH'] = os.path.dirname(__file__)
     run()

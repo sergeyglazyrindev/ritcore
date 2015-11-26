@@ -5,7 +5,11 @@ from rit.app.conf import settings
 
 sessions = {}
 for alias in ('default', 'default_slave'):
-    Session = sessionmaker()
-    engine = create_engine(settings.DATABASES[alias], echo=settings.DEBUG)
-    Session.configure(bind=engine)
+    engine = create_engine(
+        settings.DATABASES[alias],
+        echo=settings.DEBUG,
+        isolation_level="AUTOCOMMIT"
+    )
+
+    Session = sessionmaker(bind=engine, autocommit=True)
     sessions[alias] = Session()
