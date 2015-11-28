@@ -1,3 +1,5 @@
+import importlib
+
 from wheezy.http import WSGIApplication
 from wheezy.web.middleware import bootstrap_defaults
 from wheezy.web.middleware import path_routing_middleware_factory
@@ -11,11 +13,20 @@ options = {
     'render_template': template_handler
 }
 
-middlewares = EXTRA_MIDDLEWARES + [
+imported_middlewares = []
+
+for middleware in EXTRA_MIDDLEWARES:
+    middleware_parts = list(middleware.rsplit('.', 1))
+    mod = importlib.import_module(middleware_parts[0])
+    imported_middlewares.append(getattr(mod, middleware_parts[1]))
+
+middlewares = imported_middlewares + [
     rit_http_error_middleware_factory,
     bootstrap_defaults(url_mapping=all_urls),
     path_routing_middleware_factory,
 ]
+
+
 application = WSGIApplication(
     middleware=middlewares,
     options=options
