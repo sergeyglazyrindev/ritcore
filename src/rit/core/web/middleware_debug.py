@@ -118,7 +118,7 @@ def cleanse_setting(key, value):
 def get_safe_settings():
     "Returns a dictionary of the settings module, with sensitive settings blurred out."
     settings_dict = {}
-    for k in dir(settings):
+    for k in settings.loaded_settings.keys():
         if k.isupper():
             settings_dict[k] = cleanse_setting(k, getattr(settings, k))
     return settings_dict
