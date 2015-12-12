@@ -1,3 +1,3 @@
-__all__ = ['sessions', ]
+__all__ = ['sessions']
 
 from ._sessions import sessions

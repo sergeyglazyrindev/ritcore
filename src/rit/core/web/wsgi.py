@@ -19,10 +19,11 @@ def get_application():
         mod = importlib.import_module(middleware_parts[0])
         imported_middlewares.append(getattr(mod, middleware_parts[1]))
 
-    middlewares = imported_middlewares + [
+    middlewares = [
         rit_http_error_middleware_factory,
         bootstrap_defaults(url_mapping=all_urls),
-        path_routing_middleware_factory,
+    ] + imported_middlewares + [
+        path_routing_middleware_factory
     ]
     return WSGIApplication(
         middleware=middlewares,

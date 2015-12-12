@@ -52,9 +52,9 @@ def debug_middleware(request, following):
         raise
     except Exception:
         exc_info = sys.exc_info()
-        response = technical_500_response(request, *exc_info)
         if not settings.DEBUG:
             raise
+        response = technical_500_response(request, *exc_info)
     return response
 
 
