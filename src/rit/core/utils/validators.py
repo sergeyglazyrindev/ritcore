@@ -49,3 +49,7 @@ def validate_password(password):
 
     if not re.search(r'[\^\&\!\@\#\$\%\&\*\(\)\<\>\?]{1,}', password):
         raise RitValidationException('Password wrong: Add at least one special character (i.e. ^&!@#$%&*()<>?)')
+
+
+def get_first_error_from_wheezy_validator_result(errors):
+    return errors.popitem()[1].pop()

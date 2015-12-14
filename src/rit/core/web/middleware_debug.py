@@ -161,7 +161,7 @@ class ExceptionReporter(object):
     """
     def __init__(self, request, exc_type, exc_value, tb):
         self.request = request
-        self.request.path = request.environ.get('SCRIPT_NAME', '') + request.environ.get('PATH_INFO', '')
+        self.request.path = request.environ['SCRIPT_NAME'] + request.environ['PATH_INFO']
         self.filter = ExceptionReporterFilter()
         self.exc_type = exc_type
         self.exc_value = exc_value
