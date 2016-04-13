@@ -20,8 +20,10 @@ def teardown_test_environment():
 
 class TestRunner(BaseCommand):
 
+    command_params = ('--rit-verbose', )
+
     def _prepare_nose_cargs(self, *args):
-        nose_params = [arg for arg in args if arg in ('-s', )]
+        nose_params = [arg for arg in args if arg not in self.command_params]
         nose_argv = ['nosetests'] + (list(nose_params) or [])
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv = nose_argv + settings.NOSE_ARGS
