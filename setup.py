@@ -28,7 +28,7 @@ setup(
     license='MIT',
     install_requires=['wheezy.web[mako]==0.1.485', 'nose==1.3.7', 'lxml==3.4.4',
                       'uWSGI==2.0.11.1', 'SQLAlchemy==1.0.8', 'Jinja2==2.8', 'restea==0.2.1',
-                      'pg8000==1.10.2', 'python-dateutil==2.4.2', 'python3-memcached==1.51'],
+                      'pg8000==1.10.2', 'python-dateutil==2.4.2', 'python3-memcached==1.51', 'factory-boy==2.6.1'],
     package_dir={'': 'src'},
     dependency_links=['http://github.com/sergeyglazyrindev/restea/tarball/master#egg=restea==0.2.1'],
     namespace_packages=['rit'],

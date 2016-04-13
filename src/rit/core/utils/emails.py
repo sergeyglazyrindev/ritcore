@@ -2,6 +2,10 @@ from wheezy.core.mail import MailMessage, SMTPClient
 
 from rit.app.conf import settings
 
+from rit.core.monkeypatches import patch_ssl
+
+patch_ssl()
+
 
 def send_email(subject, from_addr, to_addrs, html):
     message = MailMessage(
