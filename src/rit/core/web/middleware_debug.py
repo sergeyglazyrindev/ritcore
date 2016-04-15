@@ -230,10 +230,7 @@ class ExceptionReporter(object):
 
     def get_traceback_html(self):
         "Return HTML version of debug 500 HTTP error page."
-        if settings.TESTING:
-            t = Template(TECHNICAL_500_TEMPLATE_FOR_TESTS)
-        else:
-            t = Template(TECHNICAL_500_TEXT_TEMPLATE if self.is_email else TECHNICAL_500_HTML_TEMPLATE)
+        t = Template(TECHNICAL_500_TEXT_TEMPLATE if self.is_email else TECHNICAL_500_HTML_TEMPLATE)
         context = self.get_traceback_data()
         return t.render(**context)
 
@@ -883,11 +880,6 @@ Settings:
     Using settings module {{ settings.SETTINGS_MODULE }}{% for k, v in settings.items()%}
         {{ k }} = {{ v }}
     {% endfor %}
-""")
-
-TECHNICAL_500_TEMPLATE_FOR_TESTS = ("""
-{% if exception_type %}Exception Type: {{ exception_type }}{% if request %} at {{ request.path }}{% endif %}
-{% if exception_value %}Exception Value: {{ exception_value }}{% endif %}{% endif %}
 """)
 
 TECHNICAL_404_TEMPLATE = """
