@@ -9,12 +9,13 @@ ERROR_STATUS_CODE = 403
 
 def bruteforce_protected(resource, threshold, period, cooldown, *dec_args,
                          threshold_increment=1, db_alias='default', **dec_kwargs):
-
-    def wrapper(func):
-        brute_client = BruteForceClient(resource, threshold, period, cooldown, threshold_increment=threshold_increment)
-        trigger = RudenessTrigger(brute_client, db_alias=db_alias)
-        return BruteForceDecorator(func, trigger)
-    return wrapper
+    def real_decorator(func):
+        def wrapper(*args, **kwargs):
+            brute_client = BruteForceClient(resource, threshold, period, cooldown, threshold_increment=threshold_increment)
+            trigger = RudenessTrigger(brute_client, db_alias=db_alias)
+            return BruteForceDecorator(func, trigger)(*args, **kwargs)
+        return wrapper
+    return real_decorator
 
 
 def bruteforce_protected_wheezy(resource, threshold, period, cooldown, *dec_args,

@@ -1,3 +1,4 @@
+import json
 from unittest import TestCase
 from wheezy.http import HTTPResponse
 from .db_sessions import get_session
@@ -7,11 +8,18 @@ from sqlalchemy.exc import InvalidRequestError
 class RitTypeEqualityMixin(object):
 
     def _compare_two_http_response_objects(self, first_obj, second_obj, msg=None):
-        fields_to_be_compared = ('status_code', 'buffer', 'content_type')
+        fields_to_be_compared = ('status_code', 'buffer')
+        if first_obj.content_type.startswith('application/json'):
+            first_obj.buffer = list(map(lambda s: json.loads(s.decode()), first_obj.buffer))
+        if second_obj.content_type.startswith('application/json'):
+            second_obj.buffer = list(map(lambda s: json.loads(s.decode()), second_obj.buffer))
         for field in fields_to_be_compared:
             try:
                 self.assertEqual(getattr(first_obj, field), getattr(second_obj, field))
             except AssertionError as e:
+                print(first_obj.status_code)
+                print(first_obj.buffer)
+                print(first_obj.content_type)
                 raise self.failureException(msg or str(e))
 
     def _init_all_equality_funcs(self):

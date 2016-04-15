@@ -43,6 +43,8 @@ def mail_admins(subject, message):
 
 def debug_middleware(request, following):
     assert following is not None
+    if settings.TESTING:
+        return following(request)
     try:
         response = following(request)
         if response is None:
@@ -228,7 +230,10 @@ class ExceptionReporter(object):
 
     def get_traceback_html(self):
         "Return HTML version of debug 500 HTTP error page."
-        t = Template(TECHNICAL_500_TEXT_TEMPLATE if self.is_email else TECHNICAL_500_HTML_TEMPLATE)
+        if settings.TESTING:
+            t = Template(TECHNICAL_500_TEMPLATE_FOR_TESTS)
+        else:
+            t = Template(TECHNICAL_500_TEXT_TEMPLATE if self.is_email else TECHNICAL_500_HTML_TEMPLATE)
         context = self.get_traceback_data()
         return t.render(**context)
 
@@ -850,20 +855,24 @@ Traceback:
 {% if exception_type %}Exception Type: {{ exception_type }}{% if request %} at {{ request.path }}{% endif %}
 {% if exception_value %}Exception Value: {{ exception_value }}{% endif %}{% endif %}
 {% if request %}Request information:
-    GET:{% for k, v in request.query.items() %}
-        {{ k }} = {{ v }}
-    {% endfor %}
+    {% if request.query %}
+        GET:{% for k, v in request.query.items() %}
+            {{ k }} = {{ v }}
+        {% endfor %}
+    {% endif %}
     POST:{% for k, v in filtered_POST.items() %}
         {{ k }} = {{ v }}
     {% endfor %}
-    {% if request.method != "GET" %}
+    {% if request.method != "GET" and request.files %}
         FILES:{% for k, v in request.files.items() %}
             {{ k }} = {{ v }}
         {% endfor %}
     {% endif %}
-    COOKIES:{% for k, v in request.cookies.items() %}
-        {{ k }} = {{ v }}
-    {% endfor %}
+    {% if request.cookies %}
+        COOKIES:{% for k, v in request.cookies.items() %}
+            {{ k }} = {{ v }}
+        {% endfor %}
+    {% endif %}
     META:{% for k, v in request.environ.items() %}
         {{ k }} = {{ v }}
     {% endfor %}
@@ -876,6 +885,10 @@ Settings:
     {% endfor %}
 """)
 
+TECHNICAL_500_TEMPLATE_FOR_TESTS = ("""
+{% if exception_type %}Exception Type: {{ exception_type }}{% if request %} at {{ request.path }}{% endif %}
+{% if exception_value %}Exception Value: {{ exception_value }}{% endif %}{% endif %}
+""")
 
 TECHNICAL_404_TEMPLATE = """
 <!DOCTYPE html>

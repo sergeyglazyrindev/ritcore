@@ -1,3 +1,4 @@
+import json
 from io import BytesIO
 from functools import partial
 from urllib import parse
@@ -27,6 +28,7 @@ class FakePayload(object):
         self.__content = BytesIO()
         self.__len = 0
         self.read_started = False
+        self.content_length = 0
         if content is not None:
             self.write(content)
 
@@ -49,6 +51,33 @@ class FakePayload(object):
             raise ValueError("Unable to write a payload after he's been read")
         self.__content.write(content)
         self.__len += len(content)
+        self.content_length += len(content)
+
+    def seek(self, pos):
+        self.__content.seek(pos)
+        self.__len = self.content_length - pos
+
+
+class PostDefaultFormatter(object):
+
+    @classmethod
+    def format(cls, data):
+        return data
+
+
+class PostJsonFormatter(object):
+
+    @classmethod
+    def format(cls, data):
+        return json.dumps(data)
+
+
+def get_formatter_for(content_type):
+
+    content_type_to_formatters = {
+        'json': PostJsonFormatter
+    }
+    return content_type_to_formatters.get(content_type, PostDefaultFormatter)
 
 
 class RitTestHttpClient(object):
@@ -73,11 +102,18 @@ class RitTestHttpClient(object):
             'wsgi.multiprocess': True,
             'wsgi.multithread': False,
             'wsgi.run_once': False,
+            'QUERY_STRING': ''
         }
         return environ
 
     def process(self, url=None, method='GET', data=None, environ=None, secure=False,
-                content_type='text/html; charset=UTF-8', route_name=None):
+                content_type='html', route_name=None, encoding='UTF-8'):
+        content_type_to_http_protocol_content_types = {
+            'html': 'text/html; charset={}'.format(encoding),
+            'json': 'application/json; charset={}'.format(encoding)
+        }
+        original_content_type = content_type
+        content_type = content_type_to_http_protocol_content_types[content_type]
         if route_name:
             url = router.path_for(route_name)
         if url is None:
@@ -93,12 +129,14 @@ class RitTestHttpClient(object):
             'wsgi.url_scheme': str('https') if secure else str('http'),
         })
         if method in ('POST', 'PUT'):
+            formatter = get_formatter_for(original_content_type)
+            data = formatter.format(data).encode(encoding)
             r.update({
                 'CONTENT_LENGTH': len(data),
                 'CONTENT_TYPE': str(content_type),
                 'wsgi.input': FakePayload(data),
             })
-        if method == 'GET':
+        elif method == 'GET':
             # WSGI requires latin-1 encoded strings.
             r['QUERY_STRING'] = bytes(parse.urlencode(data), 'iso-8859-1').decode()
         r.update(environ or {})
