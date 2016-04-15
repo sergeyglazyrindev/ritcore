@@ -39,16 +39,16 @@ class TestRunner(BaseCommand):
         parsed_args, _ = parser.parse_known_args(params)
         return parsed_args
 
-    def _update_settings(self, c_params):
+    def _get_settings_to_be_updated(self, c_params):
         databases = settings.DATABASES.copy()
         for alias in ('default', 'default_slave'):
             databases[alias] = databases[alias + '_test']
 
-        settings.push_custom_settings({
+        return {
             'DATABASES': databases,
             'TESTING': True,
             'VERBOSE_LOGGING': bool(c_params.rit_verbose)
-        })
+        }
 
     def _downgrade_settings(self):
         settings.pop_custom_settings()
@@ -57,9 +57,8 @@ class TestRunner(BaseCommand):
         if settings.INST_TYPE != 'dev':
             raise RuntimeError('Impossible to run tests on production')
         c_params = self._parse_cargs(*args)
-        self._update_settings(c_params)
-        nose_argv = self._prepare_nose_cargs(*args)
-        setup_test_environment()
-        nose.core.TestProgram(argv=nose_argv, exit=False)
-        teardown_test_environment()
-        self._downgrade_settings()
+        with settings.push_custom_settings(self._get_settings_to_be_updated(c_params)):
+            nose_argv = self._prepare_nose_cargs(*args)
+            setup_test_environment()
+            nose.core.TestProgram(argv=nose_argv, exit=False)
+            teardown_test_environment()
