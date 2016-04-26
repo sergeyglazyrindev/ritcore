@@ -33,7 +33,7 @@ class RudenessCacheMemcache(object):
             raise AttackerDetected()
         return too_rude
 
-
+# @todo add redis strategy. quite important, memccache strategy is not reliable
 _registered_strategies = {
     'memcache': RudenessCacheMemcache
 }
