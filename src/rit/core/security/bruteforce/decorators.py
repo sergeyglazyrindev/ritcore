@@ -7,13 +7,13 @@ from restea.errors import ForbiddenError
 ERROR_STATUS_CODE = 403
 
 
-def bruteforce_protected(resource, threshold, period, cooldown, *dec_args,
-                         threshold_increment=1, db_alias='default', **dec_kwargs):
+def bruteforce_protected_restea(resource, threshold, period, cooldown, *dec_args,
+                                threshold_increment=1, db_alias='default', **dec_kwargs):
     def real_decorator(func):
         def wrapper(*args, **kwargs):
             brute_client = BruteForceClient(resource, threshold, period, cooldown, threshold_increment=threshold_increment)
             trigger = RudenessTrigger(brute_client, db_alias=db_alias)
-            return BruteForceDecorator(func, trigger)(*args, **kwargs)
+            return BruteForceDecoratorRestEa(func, trigger)(*args, **kwargs)
         return wrapper
     return real_decorator
 
@@ -24,7 +24,7 @@ def bruteforce_protected_wheezy(resource, threshold, period, cooldown, *dec_args
     def wrapper(func):
         brute_client = BruteForceClient(resource, threshold, period, cooldown, threshold_increment=threshold_increment)
         trigger = RudenessTrigger(brute_client, db_alias=db_alias)
-        bruteforce_decorator = BruteForceDecorator(func, trigger)
+        bruteforce_decorator = BruteForceDecoratorWheezy(func, trigger)
 
         def method_wrapper(view, *args, **kwargs):
             return bruteforce_decorator(view, *args, **kwargs)
@@ -55,18 +55,25 @@ class BruteForceDecoratorHandler(object):
                 ' If you think this is a mistake, please let us know.'
             )
 
-    def __error_response(self, request, error):
-        if hasattr(request, '_original_request'):
-            raise ForbiddenError(error)
-        else:
-            resp = HTTPResponse()
-            resp.status_code = ERROR_STATUS_CODE
-            resp.write_bytes(json.dumps({'error': error}))
-            return resp
 
-
-class BruteForceDecorator(BruteForceDecoratorHandler):
+class BruteForceDecoratorRestEa(BruteForceDecoratorHandler):
 
     def __call__(self, view, *args, **kwargs):
         orig_request = view.request
         return self._call(orig_request, view, *args, **kwargs)
+
+    def __error_response(self, request, error):
+        raise ForbiddenError(error)
+
+
+class BruteForceDecoratorWheezy(BruteForceDecoratorHandler):
+
+    def __call__(self, view, *args, **kwargs):
+        orig_request = view.request
+        return self._call(orig_request, view, *args, **kwargs)
+
+    def __error_response(self, request, error):
+        resp = HTTPResponse()
+        resp.status_code = ERROR_STATUS_CODE
+        resp.write_bytes(json.dumps({'error': error}))
+        return resp

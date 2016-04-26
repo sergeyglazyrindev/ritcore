@@ -1,5 +1,5 @@
 import contextlib
-from rit.core.security.bruteforce.decorators import BruteForceDecorator
+from rit.core.security.bruteforce.decorators import BruteForceDecoratorRestEa
 
 
 def mocked_bruteforce_call_method(func):
@@ -23,7 +23,7 @@ class BruteForceDecoratorMocked(object):
 
 @contextlib.contextmanager
 def mock_bruteforce_decorator():
-    old_call = BruteForceDecorator._call
-    BruteForceDecorator._call = mocked_bruteforce_call_method(old_call)
+    old_call = BruteForceDecoratorRestEa._call
+    BruteForceDecoratorRestEa._call = mocked_bruteforce_call_method(old_call)
     yield
-    BruteForceDecorator._call = old_call
+    BruteForceDecoratorRestEa._call = old_call

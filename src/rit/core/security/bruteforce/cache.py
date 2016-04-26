@@ -1,4 +1,4 @@
-from rit.core.memcache import mc
+from rit.core.ritmemcache import mc
 from .exceptions import AttackerDetected
 
 
@@ -26,8 +26,9 @@ class RudenessCacheMemcache(object):
             success = mc.set(key, bc.threshold_increment, time=bc.period)
             if not success:
                 return False
-            return bc.threshold_increment > bc.threshold
-        too_rude = rudeness_count > bc.threshold
+            too_rude = bc.threshold_increment > bc.threshold
+        else:
+            too_rude = rudeness_count > bc.threshold
         if too_rude and rudeness_count - bc.threshold_increment <= bc.threshold:
             raise AttackerDetected()
         return too_rude

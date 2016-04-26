@@ -2,6 +2,7 @@ import datetime
 from sqlalchemy import Integer, Unicode, Column, DateTime, UniqueConstraint
 from sqlalchemy.exc import IntegrityError
 from rit.core.sqlalchemy_ext import Base
+from rit.core.utils.datetime import RitDateTime
 
 from rit.core.db import sessions
 
@@ -47,7 +48,7 @@ class DbStoreStrategy(object):
         return sessions[self.db_alias].query(Cooldown).filter(
             Cooldown.resource == bc.resource,
             Cooldown.client == bc.client,
-            Cooldown.expires_at >= datetime.datetime.now()
+            Cooldown.expires_at >= RitDateTime.now()
         ).count()
 
 _registered_strategies = {

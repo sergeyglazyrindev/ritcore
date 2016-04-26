@@ -1,5 +1,5 @@
 from rit.core.utils.ip import get_ip_address_from_request_forwarded_for
-from .exceptions import AttackerNotRecognized, DuplicatedBruteForceResourceDetected
+from .exceptions import AttackerNotRecognized
 
 _registered_resources = []
 
@@ -7,10 +7,6 @@ _registered_resources = []
 class BruteForceClient(object):
 
     def __init__(self, resource, threshold, period, cooldown, threshold_increment=1):
-        if resource in _registered_resources:
-            raise DuplicatedBruteForceResourceDetected(
-                'This {} already registered to be protected from bruteforce'.format(resource)
-            )
         self.resource = resource
         self.threshold = threshold
         self.period = period
