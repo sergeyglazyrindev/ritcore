@@ -102,7 +102,7 @@ class RitTestHttpClient(object):
             'wsgi.multiprocess': True,
             'wsgi.multithread': False,
             'wsgi.run_once': False,
-            'QUERY_STRING': ''
+            'QUERY_STRING': '',
         }
         return environ
 
