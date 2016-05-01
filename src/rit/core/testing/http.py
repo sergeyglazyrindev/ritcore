@@ -5,7 +5,7 @@ from urllib import parse
 from rit.core.web.wsgi import get_application
 from rit.core.web.urls import all_urls
 from wheezy.http.response import HTTP_STATUS
-from wheezy.http import HTTPResponse
+from wheezy.http import HTTPResponse, HTTPRequest
 from wheezy.routing import PathRouter
 
 application = get_application()
@@ -78,6 +78,33 @@ def get_formatter_for(content_type):
         'json': PostJsonFormatter
     }
     return content_type_to_formatters.get(content_type, PostDefaultFormatter)
+
+
+class RitTestHttpRequest(object):
+
+    @classmethod
+    def get_for_environ(cls, environ=None, encoding='utf-8', options=None):
+        errors = BytesIO()
+        req_environ = {
+            'HTTP_COOKIE': '',
+            'PATH_INFO': str('/'),
+            'REMOTE_ADDR': str('127.0.0.1'),
+            'REQUEST_METHOD': str('GET'),
+            'SCRIPT_NAME': str(''),
+            'SERVER_NAME': str('testserver'),
+            'SERVER_PORT': str('80'),
+            'SERVER_PROTOCOL': str('HTTP/1.1'),
+            'wsgi.version': (1, 0),
+            'wsgi.url_scheme': str('http'),
+            'wsgi.input': FakePayload(b''),
+            'wsgi.errors': errors,
+            'wsgi.multiprocess': True,
+            'wsgi.multithread': False,
+            'wsgi.run_once': False,
+            'QUERY_STRING': '',
+        }
+        req_environ.update(environ or {})
+        return HTTPRequest(req_environ, encoding, options)
 
 
 class RitTestHttpClient(object):
