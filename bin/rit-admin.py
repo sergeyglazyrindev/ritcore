@@ -4,7 +4,7 @@ import os
 import sys
 import importlib
 
-from acmdrunner import Loader, execute_command
+from acmdrunner import Loader, execute_command, list_all_commands
 
 
 def run():
@@ -12,7 +12,11 @@ def run():
     for package in packages_to_traverse:
         Loader.load_from_package(package)
     Loader.load_from_directory(os.path.dirname(__file__))
-    execute_command(sys.argv[1], *sys.argv[2:])
+    try:
+        execute_command(sys.argv[1], *sys.argv[2:])
+    except IndexError:
+        print("All registered commands are:")
+        list_all_commands()
 
 
 if __name__ == '__main__':
