@@ -1,7 +1,7 @@
 import argparse
 import nose
 
-from acmdrunner import BaseCommand, execute_command
+from acmdrunner import BaseCommand, execute_command, is_command_exists
 from rit.app.conf import settings
 from rit.core.db._sessions import dispose_all_db_connections
 
@@ -10,12 +10,16 @@ def setup_test_environment():
     dispose_all_db_connections()
     execute_command('migrations', 'create_db')
     execute_command('migrations', 'apply')
+    if is_command_exists('projectcustom-setup'):
+        execute_command('projectcustom-setup')
 
 
 def teardown_test_environment():
     dispose_all_db_connections()
     execute_command('migrations', 'apply', '--to', '0')
     execute_command('migrations', 'drop_db')
+    if is_command_exists('projectcustom-teardown'):
+        execute_command('projectcustom-teardown')
 
 
 class TestRunner(BaseCommand):
@@ -41,13 +45,13 @@ class TestRunner(BaseCommand):
 
     def _get_settings_to_be_updated(self, c_params):
         databases = settings.DATABASES.copy()
-        for alias in ('default', 'default_slave'):
+        for alias in [db_alias for db_alias in databases if not db_alias.endswith('_test')]:
             databases[alias] = databases[alias + '_test']
-
         return {
             'DATABASES': databases,
             'TESTING': True,
-            'VERBOSE_LOGGING': bool(c_params.rit_verbose)
+            'VERBOSE_LOGGING': bool(c_params.rit_verbose),
+            'SETUP_DATABASE_SESSIONS': True
         }
 
     def _downgrade_settings(self):

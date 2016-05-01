@@ -11,7 +11,7 @@ def run():
     packages_to_traverse = ('rit.app', 'rit.core')
     for package in packages_to_traverse:
         Loader.load_from_package(package)
-    Loader.load_from_directory(os.path.dirname(os.getcwd()))
+    Loader.load_from_directory(os.path.dirname(__file__))
     execute_command(sys.argv[1], *sys.argv[2:])
 
 

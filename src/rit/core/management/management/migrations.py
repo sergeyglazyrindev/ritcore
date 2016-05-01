@@ -10,13 +10,6 @@ from rit.core.db import sessions
 
 class Migrations(object):
 
-    def __init__(self, alias='default'):
-        self.alias = alias
-        self.migration_path = os.path.abspath(os.path.join(
-            settings.PROJECT_ROOT,
-            "migrations"
-        ))
-
     @cached_property
     def amigrations(self):
         return AMigrations(
@@ -37,6 +30,18 @@ class Migrations(object):
             '--to',
             help='Downgrade database to passed id in database',
             action='store'
+        )
+        parser.add_argument(
+            '--alias',
+            help='Db alias to work with',
+            action='store',
+            default='default'
+        )
+        parser.add_argument(
+            '--project-root',
+            help='Project root to take a migrations from',
+            action='store',
+            default=settings.PROJECT_ROOT
         )
         parser.add_argument(
             '--package',
@@ -96,6 +101,11 @@ class Migrations(object):
         if settings.INST_TYPE != 'dev':
             raise RuntimeError('Impossible to run migrations on production')
         self.args = self.parse_cargs(*params)
+        self.alias = self.args.alias
+        self.migration_path = os.path.abspath(os.path.join(
+            self.args.project_root,
+            "migrations"
+        ))
         getattr(self, action)()
 
     def apply(self):
