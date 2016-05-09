@@ -2,7 +2,7 @@ import argparse
 import nose
 
 from rit.app.conf import settings
-from rit.core.db._sessions import dispose_all_db_connections
+from rit.core.db._sessions import dispose_all_db_connections, sessions
 from rit.core.environment.app import get_env_for_app
 
 app_env = get_env_for_app()
@@ -10,18 +10,19 @@ app_env = get_env_for_app()
 
 def setup_test_environment():
     dispose_all_db_connections()
-    app_env.cmd_dispatcher.execute_command('migrations', 'create_db')
-    app_env.cmd_dispatcher.execute_command('migrations', 'apply')
     if app_env.cmd_dispatcher.is_registered('projectcustom-setup'):
         app_env.cmd_dispatcher.execute_command('projectcustom-setup')
+    else:
+        app_env.cmd_dispatcher.execute_command('migrations', 'create_db')
+        app_env.cmd_dispatcher.execute_command('migrations', 'apply')
 
 
 def teardown_test_environment():
     dispose_all_db_connections()
-    app_env.cmd_dispatcher.execute_command('migrations', 'apply', '--to', '0')
-    app_env.cmd_dispatcher.execute_command('migrations', 'drop_db')
     if app_env.cmd_dispatcher.is_registered('projectcustom-teardown'):
         app_env.cmd_dispatcher.execute_command('projectcustom-teardown')
+    else:
+        app_env.cmd_dispatcher.execute_command('migrations', 'drop_db')
 
 
 class TestRunner(object):
@@ -50,11 +51,11 @@ class TestRunner(object):
         for alias in [db_alias for db_alias in databases
                       if not db_alias.endswith('_test')]:
             databases[alias] = databases[alias + '_test']
+        sessions._db_uris = databases
         return {
             'DATABASES': databases,
             'TESTING': True,
             'VERBOSE_LOGGING': bool(c_params.rit_verbose),
-            'SETUP_DATABASE_SESSIONS': True
         }
 
     def _downgrade_settings(self):

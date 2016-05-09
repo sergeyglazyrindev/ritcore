@@ -9,10 +9,10 @@ class DbConfigurationException(object):
     pass
 
 
-def get_db_session_for_non_testing_environment(database_alias):
+def get_db_session_for_non_testing_environment(db_uri):
     kwargs_for_create_engine = {'isolation_level': 'AUTOCOMMIT', 'echo': settings.DEBUG}
     engine = create_engine(
-        settings.DATABASES[database_alias],
+        db_uri,
         **kwargs_for_create_engine
     )
 
@@ -21,12 +21,12 @@ def get_db_session_for_non_testing_environment(database_alias):
     return Session()
 
 
-def get_db_session_for_testing_environment(db_alias):
+def get_db_session_for_testing_environment(db_uri):
     kwargs_for_create_engine = {'isolation_level': 'READ UNCOMMITTED'}
     if settings.VERBOSE_LOGGING:
         kwargs_for_create_engine['echo'] = True
     engine = create_engine(
-        settings.DATABASES[db_alias],
+        db_uri,
         **kwargs_for_create_engine
     )
 
@@ -38,24 +38,25 @@ def get_db_session_for_testing_environment(db_alias):
 
 class DbSessionHandler(object):
 
-    def __init__(self):
+    def __init__(self, db_uris=None):
         self.__db_sessions = {}
+        self._db_uris = db_uris or settings.DATABASES
 
     def __getitem__(self, db_alias):
         if settings.TESTING:
             '''We want to work always with masters in test environment'''
             db_alias = re.sub(r'_slave$', '', db_alias)
-        if settings.SETUP_DATABASE_SESSIONS and db_alias not in self.__db_sessions:
+        if db_alias not in self.__db_sessions:
             self.setup_database_session(db_alias)
-        if not settings.SETUP_DATABASE_SESSIONS and db_alias not in self.__db_sessions:
+        if db_alias not in self.__db_sessions:
             raise DbConfigurationException('{} db could not initialized.'.format(db_alias))
         return self.__db_sessions[db_alias]
 
     def setup_database_session(self, db_alias):
         if settings.TESTING:
-            self.__db_sessions[db_alias] = get_db_session_for_testing_environment(db_alias)
+            self.__db_sessions[db_alias] = get_db_session_for_testing_environment(self._db_uris[db_alias])
         else:
-            self.__db_sessions[db_alias] = get_db_session_for_non_testing_environment(db_alias)
+            self.__db_sessions[db_alias] = get_db_session_for_non_testing_environment(self._db_uris[db_alias])
 
     def __iter__(self):
 

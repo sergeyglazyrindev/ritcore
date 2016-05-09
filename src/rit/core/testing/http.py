@@ -7,6 +7,7 @@ from rit.core.web.urls import all_urls
 from wheezy.http.response import HTTP_STATUS
 from wheezy.http import HTTPResponse, HTTPRequest
 from wheezy.routing import PathRouter
+from rit.app.conf import settings
 
 application = get_application()
 
@@ -91,7 +92,7 @@ class RitTestHttpRequest(object):
             'REMOTE_ADDR': str('127.0.0.1'),
             'REQUEST_METHOD': str('GET'),
             'SCRIPT_NAME': str(''),
-            'SERVER_NAME': str('testserver'),
+            'SERVER_NAME': str(settings.INST_NAME + "_test"),
             'SERVER_PORT': str('80'),
             'SERVER_PROTOCOL': str('HTTP/1.1'),
             'wsgi.version': (1, 0),

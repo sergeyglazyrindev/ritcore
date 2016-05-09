@@ -1,3 +1,4 @@
+import sys
 import psycopg2
 import os
 import argparse
@@ -85,6 +86,7 @@ class Migrations(object):
 
     def create_db(self):
         if self._check_if_db_exists():
+            print(sessions._db_uris[self.alias])
             answer = input(
                 'The database {} exists. Drop it ? y/N:'.format(
                     self.alias
@@ -92,6 +94,8 @@ class Migrations(object):
             )
             if answer.lower() == 'y':
                 self._drop_database()
+            else:
+                sys.exit()
 
         self._create_database()
 
