@@ -4,8 +4,6 @@ from sqlalchemy.exc import IntegrityError
 from rit.core.sqlalchemy_ext import Base
 from rit.core.utils.datetime import RitDateTime
 
-from rit.core.db import sessions
-
 
 class CooldownStoreFactory(object):
 
@@ -16,9 +14,9 @@ class CooldownStoreFactory(object):
 
 class DbStoreStrategy(object):
 
-    def __init__(self, bruteforce_client, db_alias='default'):
+    def __init__(self, bruteforce_client, db_handler=None):
         self.bruteforce_client = bruteforce_client
-        self.db_alias = db_alias
+        self.db_handler = db_handler
 
     def remember_rudeness(self):
         bc = self.bruteforce_client
@@ -28,10 +26,9 @@ class DbStoreStrategy(object):
         cooldown.threshold = bc.threshold
         cooldown.period = bc.period
         cooldown.cooldown = bc.cooldown
-        session = sessions[self.db_alias]
-        session.add(cooldown)
+        self.db_handler.add(cooldown)
         try:
-            session.flush()
+            self.db_handler.flush()
         except IntegrityError:
             update = {}
             update['expires_at'] = datetime.datetime.now() + datetime.timedelta(seconds=bc.cooldown)
@@ -41,11 +38,11 @@ class DbStoreStrategy(object):
             ).where(
                 Cooldown.client == bc.client
             )
-            session.execute(upd)
+            self.db_handler.execute(upd)
 
     def if_client_blocked(self):
         bc = self.bruteforce_client
-        return sessions[self.db_alias].query(Cooldown).filter(
+        return self.db_handler.query(Cooldown).filter(
             Cooldown.resource == bc.resource,
             Cooldown.client == bc.client,
             Cooldown.expires_at >= RitDateTime.now()

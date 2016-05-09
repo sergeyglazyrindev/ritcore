@@ -12,8 +12,7 @@ def bruteforce_protected_restea(resource, threshold, period, cooldown, *dec_args
     def real_decorator(func):
         def wrapper(*args, **kwargs):
             brute_client = BruteForceClient(resource, threshold, period, cooldown, threshold_increment=threshold_increment)
-            trigger = RudenessTrigger(brute_client, db_alias=db_alias)
-            return BruteForceDecoratorRestEa(func, trigger)(*args, **kwargs)
+            return BruteForceDecoratorRestEa(func, brute_client, db_alias)(*args, **kwargs)
         return wrapper
     return real_decorator
 
@@ -23,8 +22,7 @@ def bruteforce_protected_wheezy(resource, threshold, period, cooldown, *dec_args
 
     def wrapper(func):
         brute_client = BruteForceClient(resource, threshold, period, cooldown, threshold_increment=threshold_increment)
-        trigger = RudenessTrigger(brute_client, db_alias=db_alias)
-        bruteforce_decorator = BruteForceDecoratorWheezy(func, trigger)
+        bruteforce_decorator = BruteForceDecoratorWheezy(func, brute_client, db_alias)
 
         def method_wrapper(view, *args, **kwargs):
             return bruteforce_decorator(view, *args, **kwargs)
@@ -34,18 +32,20 @@ def bruteforce_protected_wheezy(resource, threshold, period, cooldown, *dec_args
 
 class BruteForceDecoratorHandler(object):
 
-    def __init__(self, func, trigger):
+    def __init__(self, func, brute_client, db_alias):
         self.func = func
-        self.trigger = trigger
+        self.brute_client = brute_client
+        self.db_alias = db_alias
 
     def _call(self, orig_request, *args, **kwargs):
         wheezy_request = None
         if hasattr(orig_request, '_original_request'):
             wheezy_request = orig_request._original_request
         request = wheezy_request or orig_request
-        if self.trigger.was_too_rude(request):
+        trigger = RudenessTrigger(self.brute_client, db_handler=request.get_db_handler_for_db_alias(self.db_alias))
+        if trigger.was_too_rude(request):
             return self.__error_response(orig_request, 'Sorry, but you tried to do that too often')
-        if not self.trigger.if_client_blocked(request):
+        if not trigger.if_client_blocked(request):
             return self.func(*args, **kwargs)
         else:
             return self.__error_response(

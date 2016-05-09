@@ -5,11 +5,11 @@ from .exceptions import AttackerDetected
 
 class RudenessTrigger(object):
 
-    def __init__(self, bruteforce_client, cache_strategy='memcache', store_rude_strategy='db', db_alias='default'):
+    def __init__(self, bruteforce_client, cache_strategy='memcache', store_rude_strategy='db', db_handler=None):
         self.bruteforce_client = bruteforce_client
         self.cooldown_storage = CooldownStoreFactory.get_strategy(store_rude_strategy)(
             bruteforce_client,
-            db_alias=db_alias
+            db_handler=db_handler
         )
         self.cache = RudenessCacheFactory.get_strategy(cache_strategy)(bruteforce_client)
 

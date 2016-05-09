@@ -8,8 +8,9 @@ import os
 
 class VcsCommitHandler(object):
 
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, params):
+        self.message = params.m
+        self.no_verify_commit = params.no_verify
 
     def show_status(self):
         raise NotImplementedError()
@@ -51,7 +52,10 @@ class GitCommitHandler(VcsCommitHandler):
         )
 
     def commit(self):
-        subprocess.call(['git', 'commit', '-m', self.message])
+        args = ['git', 'commit', '-m', self.message]
+        if self.no_verify_commit:
+            args.append('--no-verify')
+        subprocess.call(args)
 
 
 def ask_if_user_agrees_with_changes(message):
@@ -116,6 +120,11 @@ class CommitChangesCommand(object):
             required=True
         )
         parser.add_argument(
+            '--no-verify',
+            help='no verify while commit',
+            action='store_true'
+        )
+        parser.add_argument(
             '--vcs',
             help='Version control system in use in this project',
             action='store',
@@ -138,9 +147,9 @@ class CommitChangesCommand(object):
     def __call__(self, *params):
         params = self.parse_cargs(*params)
         commithandler = get_vcs_handler(params.vcs)
-        self._try_to_commit(commithandler(params.m), params.package)
+        self._try_to_commit(commithandler(params), params.package)
         if params.package:
             print('We successfully commited changes')
         else:
             for package in self.extra_packages_possible_to_interact_with:
-                self._try_to_commit(commithandler(params.m), package)
+                self._try_to_commit(commithandler(params), package)

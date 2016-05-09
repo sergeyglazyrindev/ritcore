@@ -4,12 +4,13 @@ import mock
 
 from .. import orm
 from . import BaseBruteForceTestCase
+from rit.core.db import sessions
 
 
 class DbBruteForceOrmTestCase(BaseBruteForceTestCase):
 
     def test(self):
-        db = orm.DbStoreStrategy(self.make_client())
+        db = orm.DbStoreStrategy(self.make_client(), db_handler=sessions['default'])
         db.remember_rudeness()
         self.assertTrue(db.if_client_blocked())
         with mock.patch('rit.core.security.bruteforce.orm.RitDateTime', autospec=True) as datetime_mocked:
