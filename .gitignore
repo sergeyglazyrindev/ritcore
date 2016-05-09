@@ -10,3 +10,4 @@
 *.egg-info
 __pycache__
 local_settings.py
+.projectile

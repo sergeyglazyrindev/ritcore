@@ -45,14 +45,20 @@ class GitCommitHandler(VcsCommitHandler):
         subprocess.call(['git diff --cached | less'], shell=True)
 
     def add_all_files(self):
-        subprocess.call(['git add `git rev-parse --show-toplevel`'], shell=True)
+        subprocess.call(
+            ['git add `git rev-parse --show-toplevel`'],
+            shell=True
+        )
 
     def commit(self):
         subprocess.call(['git', 'commit', '-m', self.message])
 
 
 def ask_if_user_agrees_with_changes(message):
-    is_agree = input('Do you agree with such {} output/changes ? Please answer y/N:'.format(message))
+    message = 'Do you agree with such {} output/changes ? y/N:'.format(
+        message
+    )
+    is_agree = input(message)
     return is_agree.lower() == 'y'
 
 
@@ -72,11 +78,15 @@ def commitcontextmanager(commithandler, pythonpackage=None):
             yield
             return
         commithandler.show_status()
-        if not ask_if_user_agrees_with_changes(commithandler.status_help_message):
+        if not ask_if_user_agrees_with_changes(
+                commithandler.status_help_message
+        ):
             sys.exit()
         commithandler.add_all_files()
         commithandler.show_diff()
-        if not ask_if_user_agrees_with_changes(commithandler.diff_help_message):
+        if not ask_if_user_agrees_with_changes(
+                commithandler.diff_help_message
+        ):
             sys.exit()
         commithandler.commit()
         yield
@@ -125,7 +135,7 @@ class CommitChangesCommand(object):
         with commitcontextmanager(commithandler, pythonpackage=pythonpackage):
             pass
 
-    def execute(self, *params):
+    def __call__(self, *params):
         params = self.parse_cargs(*params)
         commithandler = get_vcs_handler(params.vcs)
         self._try_to_commit(commithandler(params.m), params.package)

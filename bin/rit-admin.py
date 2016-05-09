@@ -4,7 +4,8 @@ import os
 import sys
 import importlib
 
-from acmdrunner import Loader, execute_command, list_all_commands
+from acmdrunner import Loader
+from rit.core.environment.app import get_env_for_app
 
 
 def run():
@@ -12,11 +13,14 @@ def run():
     for package in packages_to_traverse:
         Loader.load_from_package(package)
     Loader.load_from_directory(os.path.dirname(__file__))
+    app_env = get_env_for_app()
     try:
-        execute_command(sys.argv[1], *sys.argv[2:])
+        app_env.cmd_dispatcher.execute_command(
+            sys.argv[1], *sys.argv[2:]
+        )
     except IndexError:
         print("All registered commands are:")
-        list_all_commands()
+        app_env.cmd_dispatcher.list_all_commands()
 
 
 if __name__ == '__main__':

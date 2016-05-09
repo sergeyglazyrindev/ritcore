@@ -10,7 +10,9 @@ class Postgres(object):
     def _build_shell_string(self):
         cmd_buffer = []
         if self.uri.password:
-            cmd_buffer.extend(['export PGPASSWORD={};'.format(shlex.quote(self.uri.password))])
+            cmd_buffer.extend(['export PGPASSWORD={};'.format(
+                shlex.quote(self.uri.password)
+            )])
         cmd_buffer.append('psql')
         if self.uri.username:
             cmd_buffer.extend(['-U', shlex.quote(self.uri.username)])

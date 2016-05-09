@@ -3,9 +3,10 @@ from .commit import CommitChangesCommand
 from .shell import ShellCommand
 from .dbshell.command import OpenDbShellCommand
 
-from acmdrunner import register_command
+from rit.core.environment.app import get_env_for_app
 
-register_command('migrations', Migrations)
-register_command('commit', CommitChangesCommand)
-register_command('shell', ShellCommand)
-register_command('dbshell', OpenDbShellCommand)
+app_env = get_env_for_app()
+app_env.cmd_dispatcher.register_command('migrations', Migrations())
+app_env.cmd_dispatcher.register_command('commit', CommitChangesCommand())
+app_env.cmd_dispatcher.register_command('shell', ShellCommand())
+app_env.cmd_dispatcher.register_command('dbshell', OpenDbShellCommand())

@@ -1,5 +1,6 @@
-from acmdrunner import register_command
-
 from .trunner import TestRunner
+from rit.core.environment.app import get_env_for_app
 
-register_command('test', TestRunner)
+app_env = get_env_for_app()
+
+app_env.cmd_dispatcher.register_command('test', TestRunner())

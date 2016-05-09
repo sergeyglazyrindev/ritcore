@@ -3,7 +3,8 @@ import argparse
 
 
 class ShellCommand(object):
-    help = "Runs a Python interactive interpreter. Tries to use IPython or bpython, if one of them is available."
+    help = ('''Runs a Python interactive interpreter. Tries to use
+    IPython or bpython, if one of them is available.''')
     requires_system_checks = False
     shells = ['ipython', 'bpython', 'python']
 
@@ -11,15 +12,18 @@ class ShellCommand(object):
         parser = argparse.ArgumentParser()
         parser.add_argument(
             '--no-startup', action='store_true',
-            help='When using plain Python, ignore the PYTHONSTARTUP environment variable and ~/.pythonrc.py script.',
+            help=('''When using plain Python, ignore the PYTHONSTARTUP environment
+            variable and ~/.pythonrc.py script.'''),
         )
         parser.add_argument(
             '-i', '--interface', choices=self.shells,
-            help='Specify an interactive interpreter interface. Available options: "ipython", "bpython", and "python"',
+            help=('''Specify an interactive interpreter interface.
+            Available options: "ipython", "bpython", and "python"'''),
         )
         parser.add_argument(
             '-c', '--command',
-            help='Instead of opening an interactive shell, run a command as Django and exit.',
+            help=('''Instead of opening an interactive shell,
+            run a command as Django and exit.'''),
         )
         parsed_args = parser.parse_args(params)
         return parsed_args
@@ -44,7 +48,11 @@ class ShellCommand(object):
 
     def ipython(self, options):
         """Start any version of IPython"""
-        for ip in (self._ipython, self._ipython_pre_100, self._ipython_pre_011):
+        for ip in (
+                self._ipython,
+                self._ipython_pre_100,
+                self._ipython_pre_011
+        ):
             try:
                 ip()
             except ImportError:
@@ -71,7 +79,9 @@ class ShellCommand(object):
             # We don't have to wrap the following import in a 'try', because
             # we already know 'readline' was imported successfully.
             import rlcompleter
-            readline.set_completer(rlcompleter.Completer(imported_objects).complete)
+            readline.set_completer(
+                rlcompleter.Completer(imported_objects).complete
+            )
             # Enable tab completion on systems using libedit (e.g. Mac OSX).
             # These lines are copied from Lib/site.py on Python 3.4.
             readline_doc = getattr(readline, '__doc__', '')
@@ -80,10 +90,14 @@ class ShellCommand(object):
             else:
                 readline.parse_and_bind("tab:complete")
 
-        # We want to honor both $PYTHONSTARTUP and .pythonrc.py, so follow system
+        # We want to honor both $PYTHONSTARTUP and .pythonrc.py,
+        # so follow system
         # conventions and get $PYTHONSTARTUP first then .pythonrc.py.
         if not options.no_startup:
-            for pythonrc in (os.environ.get("PYTHONSTARTUP"), '~/.pythonrc.py'):
+            for pythonrc in (
+                    os.environ.get("PYTHONSTARTUP"),
+                    '~/.pythonrc.py'
+            ):
                 if not pythonrc:
                     continue
                 pythonrc = os.path.expanduser(pythonrc)
@@ -91,15 +105,19 @@ class ShellCommand(object):
                     continue
                 try:
                     with open(pythonrc) as handle:
-                        exec(compile(handle.read(), pythonrc, 'exec'), imported_objects)
+                        exec(
+                            compile(handle.read(), pythonrc, 'exec'),
+                            imported_objects
+                        )
                 except NameError:
                     pass
         code.interact(local=imported_objects)
 
-    def execute(self, *params):
+    def __call__(self, *params):
         params = self.parse_cargs(*params)
 
-        available_shells = [params.interface] if params.interface else self.shells
+        available_shells = ([params.interface] if params.interface
+                            else self.shells)
 
         for shell in available_shells:
             try:

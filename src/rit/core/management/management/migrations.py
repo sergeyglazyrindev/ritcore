@@ -4,13 +4,12 @@ import argparse
 
 from amigrations import AMigrations
 from rit.app.conf import settings
-from rit.core.decorators.method_decorators import cached_property
 from rit.core.db import sessions
 
 
 class Migrations(object):
 
-    @cached_property
+    @property
     def amigrations(self):
         return AMigrations(
             settings.DATABASES[self.alias],
@@ -86,7 +85,11 @@ class Migrations(object):
 
     def create_db(self):
         if self._check_if_db_exists():
-            answer = input('The database {} exists. Would you like to drop it and create again ? Please answer y/N:'.format(self.alias))
+            answer = input(
+                'The database {} exists. Drop it ? y/N:'.format(
+                    self.alias
+                )
+            )
             if answer.lower() == 'y':
                 self._drop_database()
 
@@ -97,7 +100,7 @@ class Migrations(object):
             raise RuntimeError('The db {} doesn\'t exists'.format(self.alias))
         self._drop_database()
 
-    def execute(self, action, *params):
+    def __call__(self, action, *params):
         if settings.INST_TYPE != 'dev':
             raise RuntimeError('Impossible to run migrations on production')
         self.args = self.parse_cargs(*params)

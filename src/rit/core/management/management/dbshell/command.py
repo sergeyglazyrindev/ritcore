@@ -18,7 +18,7 @@ class OpenDbShellCommand(object):
         parsed_args = parser.parse_args(params)
         return parsed_args
 
-    def execute(self, *params):
+    def __call__(self, *params):
         params = self.parse_cargs(*params)
         uri = make_url(settings.DATABASES[params.db])
         dialect = get_dialect_by_type(uri.get_backend_name())
