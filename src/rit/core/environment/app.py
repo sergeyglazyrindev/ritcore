@@ -1,6 +1,7 @@
 import importlib
 from rit.app.conf import settings
 from acmdrunner import CommandDispatcher
+from rit.core.db import sessions
 
 
 class EnvironmentBuilder(object):
@@ -9,6 +10,7 @@ class EnvironmentBuilder(object):
     def build(cls):
         env = Environment()
         env.cmd_dispatcher = CommandDispatcher()
+        env.db_handler = sessions
         return env
 
 
@@ -21,6 +23,14 @@ class Environment(object):
     @cmd_dispatcher.setter
     def cmd_dispatcher(self, dispatcher):
         self._cmd_dispatcher = dispatcher
+
+    @property
+    def db_handler(self):
+        return self._db_handler
+
+    @db_handler.setter
+    def db_handler(self, db_handler):
+        self._db_handler = db_handler
 
 app_env = EnvironmentBuilder.build()
 
