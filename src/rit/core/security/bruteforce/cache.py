@@ -21,7 +21,7 @@ class RudenessCacheMemcache(object):
     def was_too_rude(self):
         bc = self.bruteforce_client
         key = get_cache_key_for_client_and_resource(bc.client, bc.resource)
-        rudeness_count = mc.incr(key, delta=bc.threshold_increment)
+        rudeness_count = mc.incr(key, delta=1)
         if not rudeness_count:
             success = mc.set(key, bc.threshold_increment, time=bc.period)
             if not success:

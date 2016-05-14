@@ -44,11 +44,11 @@ class BruteForceDecoratorHandler(object):
         request = wheezy_request or orig_request
         trigger = RudenessTrigger(self.brute_client, db_handler=request.get_db_handler_for_db_alias(self.db_alias))
         if trigger.was_too_rude(request):
-            return self.__error_response(orig_request, 'Sorry, but you tried to do that too often')
+            return self._error_response(orig_request, 'Sorry, but you tried to do that too often')
         if not trigger.if_client_blocked(request):
             return self.func(*args, **kwargs)
         else:
-            return self.__error_response(
+            return self._error_response(
                 orig_request,
                 'Sorry, but you are not able to do this right now.'
                 ' You are blocked because of the suspicious activity.'
@@ -62,7 +62,7 @@ class BruteForceDecoratorRestEa(BruteForceDecoratorHandler):
         orig_request = view.request
         return self._call(orig_request, view, *args, **kwargs)
 
-    def __error_response(self, request, error):
+    def _error_response(self, request, error):
         raise ForbiddenError(error)
 
 
@@ -72,7 +72,7 @@ class BruteForceDecoratorWheezy(BruteForceDecoratorHandler):
         orig_request = view.request
         return self._call(orig_request, view, *args, **kwargs)
 
-    def __error_response(self, request, error):
+    def _error_response(self, request, error):
         resp = HTTPResponse()
         resp.status_code = ERROR_STATUS_CODE
         resp.write_bytes(json.dumps({'error': error}))

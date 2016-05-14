@@ -8,7 +8,7 @@ function execute() {
 
 execute "$@"
 
-inotifywait --quiet --recursive --monitor --event modify --format "%w%f" . \
+nohup inotifywait --quiet --recursive --monitor --event modify --format "%w%f" . \
 | while read change; do
     execute "$@"
 done

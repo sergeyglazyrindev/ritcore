@@ -8,6 +8,8 @@ patch_ssl()
 
 
 def send_email(subject, from_addr, to_addrs, html):
+    if settings.INST_TYPE == 'dev':
+        to_addrs = list(settings.DEBUG_EMAILS)
     message = MailMessage(
         subject=subject,
         from_addr=from_addr,
