@@ -32,10 +32,11 @@ setup(
                       'python-dateutil==2.4.2', 'python3-memcached==1.51',
                       'factory-boy==2.6.1', 'acmdrunner==1.2',
                       'amigrations==0.5', 'lxml==3.4.4', 'SQLAlchemy==1.0.8',
-                      'mock==2.0.0', 'pytz==2016.4', 'future==0.15.2'],
+                      'mock==2.0.0', 'pytz==2016.4', 'future==0.15.2',
+                      'restea==0.3.0'],
     package_dir={'': 'src'},
     dependency_links=[('http://github.com/sergeyglazyrindev/restea/'
-                       'tarball/py3version#egg=restea==0.3.0')],
+                       'tarball/py3version#egg=restea-0.3.0')],
     namespace_packages=['rit'],
     include_package_data=True,
     zip_safe=False,
